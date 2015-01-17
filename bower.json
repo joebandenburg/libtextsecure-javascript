@@ -1,0 +1,39 @@
+{
+  "name": "libtextsecure",
+  "main": "dist/libtextsecure.js",
+  "version": "0.1.0",
+  "authors": [
+    "Joe Bandenburg <joe@bandenburg.com>"
+  ],
+  "description": "A JavaScript port of libtextsecure",
+  "moduleType": [
+    "amd",
+    "globals",
+    "node"
+  ],
+  "keywords": [
+    "axolotl",
+    "textsecure"
+  ],
+  "license": "LGPLv3",
+  "ignore": [
+    "build",
+    "src",
+    "test",
+    "protobuf",
+    ".travis.yml",
+    "Gruntfile.js",
+    "index.js",
+    "banner.js",
+    "package.json",
+    ".travis.yml",
+    ".jshintrc",
+    ".jscsrc",
+    ".gitignore",
+    "node_modules"
+  ],
+  "dependencies": {
+    "protobuf": "~3.8.2",
+    "traceur-runtime": "~0.0.79"
+  }
+}

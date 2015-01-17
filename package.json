@@ -1,0 +1,28 @@
+{
+  "name": "libtextsecure",
+  "version": "0.1.0",
+  "description": "A JavaScript port of libtextsecure.",
+  "main": "dist/libtextsecure.js",
+  "directories": {
+    "test": "test"
+  },
+  "devDependencies": {
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "keywords": [
+    "axolotl",
+    "textsecure"
+  ],
+  "author": "Joe Bandenburg <joe@bandenburg.com>",
+  "license": "LGPLv3",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/joebandenburg/libtextsecure-javascript.git"
+  },
+  "dependencies": {
+    "protobufjs": "~3.8.2",
+    "traceur-runtime": "0.0.59"
+  }
+}
