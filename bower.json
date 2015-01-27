@@ -1,11 +1,11 @@
 {
-  "name": "libtextsecure",
-  "main": "dist/libtextsecure.js",
+  "name": "textsecure",
+  "main": "dist/textsecure.js",
   "version": "0.1.0",
   "authors": [
     "Joe Bandenburg <joe@bandenburg.com>"
   ],
-  "description": "A JavaScript port of libtextsecure",
+  "description": "A JavaScript implementation of the TextSecure protocol.",
   "moduleType": [
     "amd",
     "globals",
@@ -34,6 +34,7 @@
   ],
   "dependencies": {
     "protobuf": "~3.8.2",
-    "traceur-runtime": "~0.0.79"
+    "traceur-runtime": "~0.0.83",
+    "axolotl": "~1.2.0"
   }
 }
