@@ -1,0 +1,15 @@
+/.idea
+/bower_components
+/build
+/protobuf
+/src
+/test
+/.gitattributes
+/.gitignore
+/.jscsrc
+/.jshintrc
+/.travis.yml
+/banner.js
+/bower.json
+/Gruntfile.js
+/index.js

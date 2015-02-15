@@ -17,20 +17,19 @@
   ],
   "license": "LGPLv3",
   "ignore": [
-    "build",
+    "protobuf",
     "src",
     "test",
-    "protobuf",
+    ".gitattributes",
+    ".gitignore",
+    ".jscsrc",
+    ".jshintrc",
+    ".npmignore",
     ".travis.yml",
+    "banner.js",
     "Gruntfile.js",
     "index.js",
-    "banner.js",
-    "package.json",
-    ".travis.yml",
-    ".jshintrc",
-    ".jscsrc",
-    ".gitignore",
-    "node_modules"
+    "package.json"
   ],
   "dependencies": {
     "protobuf": "~3.8.2",
