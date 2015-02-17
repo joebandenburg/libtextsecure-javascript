@@ -17,6 +17,6 @@
 
 import TextSecure from "./src/TextSecure";
 
-module.exports = function(store, endpoint) {
-    return new TextSecure(store, endpoint);
+module.exports = function(store, serverEndpointHost, webSocketFactory, options) {
+    return new TextSecure(store, serverEndpointHost, webSocketFactory, options);
 };

@@ -27,7 +27,7 @@ import axolotlCrypto from "axolotl-crypto";
 import axios from "axios";
 import co from "co";
 
-function TextSecure(store, endpoint) {
+function TextSecure(store, serverEndpointHost, webSocketFactory, options) {
     this.onmessage = () => {};
     this.onreceipt = () => {};
 
@@ -60,13 +60,19 @@ function TextSecure(store, endpoint) {
         initialisePostRegistration();
     });
 
+    options = Object.assign({}, {
+        httpUseTls: true,
+        webSocketUseTls: true
+    }, options);
+
     var axol = axolotl({
         getLocalIdentityKeyPair: () => localState.identityKeyPair,
         getLocalRegistrationId: () => localState.registrationId,
         getLocalSignedPreKeyPair: store.getLocalSignedPreKeyPair,
         getLocalPreKeyPair: store.getLocalPreKeyPair
     });
-    var protocol = new Protocol("https://" + endpoint, axios);
+    var httpEndpoint = (options.httpUseTls ? "https" : "http") + "://" + serverEndpointHost;
+    var protocol = new Protocol(httpEndpoint, axios);
     var accountCreator = new AccountCreator(store, axol, axolotlCrypto, protocol);
 
     var localState = null;
@@ -99,23 +105,13 @@ function TextSecure(store, endpoint) {
         messageReceiver.onpushmessagecontent = self.onmessage;
         messageReceiver.onreceipt = self.onreceipt;
 
-        var wsUrl = "wss://" + endpoint + "/v1/websocket/?login=" +
+        var wsEndpoint = (options.webSocketUseTls ? "wss" : "ws") + "://" + serverEndpointHost;
+        var wsUrl = wsEndpoint + "/v1/websocket/?login=" +
             encodeURIComponent(localState.auth.number) + "." + encodeURIComponent(localState.auth.device) +
             "&password=" + encodeURIComponent(localState.auth.password);
 
-        var webSocket = new WebSocket(wsUrl);
-        var wrappedWebSocket = {
-            send: webSocket.send.bind(webSocket)
-        };
-        webSocket.onmessage = (event) => {
-            var reader = new FileReader();
-            reader.onload = () => {
-                wrappedWebSocket.onmessage(reader.result);
-            };
-            reader.readAsArrayBuffer(event.data);
-        };
-
-        var transport = new WebSocketPushTransport(wrappedWebSocket);
+        var webSocket = webSocketFactory.connect(wsUrl);
+        var transport = new WebSocketPushTransport(webSocket);
         transport.onmessage = messageReceiver.processIncomingMessageSignal;
     };
 
