@@ -62,7 +62,8 @@ function TextSecure(store, serverEndpointHost, webSocketFactory, options) {
 
     options = Object.assign({}, {
         httpUseTls: true,
-        webSocketUseTls: true
+        webSocketUseTls: true,
+        initialPreKeyGenerationCount: 100
     }, options);
 
     var axol = axolotl({
@@ -73,7 +74,7 @@ function TextSecure(store, serverEndpointHost, webSocketFactory, options) {
     });
     var httpEndpoint = (options.httpUseTls ? "https" : "http") + "://" + serverEndpointHost;
     var protocol = new Protocol(httpEndpoint, axios);
-    var accountCreator = new AccountCreator(store, axol, axolotlCrypto, protocol);
+    var accountCreator = new AccountCreator(store, axol, axolotlCrypto, protocol, options.initialPreKeyGenerationCount);
 
     var localState = null;
 

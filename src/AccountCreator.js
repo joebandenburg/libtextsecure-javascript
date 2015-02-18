@@ -18,7 +18,7 @@
 import co from "co";
 import {encode} from "./Base64";
 
-function AccountCreator(store, axolotl, axolotlCrypto, protocol) {
+function AccountCreator(store, axolotl, axolotlCrypto, protocol, preKeyGenerationCount) {
     this.requestVerificationCode = (number) => protocol.requestVerificationCode("sms", number);
 
     this.registerFirstDevice = co.wrap(function*(number, verificationCode) {
@@ -39,7 +39,7 @@ function AccountCreator(store, axolotl, axolotlCrypto, protocol) {
         yield protocol.createAccount(localState.auth, verificationCode, localState.signalingKey,
             localState.registrationId);
         yield store.putLocalState(localState);
-        var preKeys = yield axolotl.generatePreKeys(0, 100);
+        var preKeys = yield axolotl.generatePreKeys(0, preKeyGenerationCount);
         var lastResortPreKey = yield axolotl.generateLastResortPreKey();
         var signedPreKey = yield axolotl.generateSignedPreKey(identityKeyPair, 0);
         yield protocol.registerPreKeys(localState.auth, preKeys, lastResortPreKey, signedPreKey,

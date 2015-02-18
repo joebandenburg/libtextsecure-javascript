@@ -77,7 +77,7 @@ describe("AccountCreator", () => {
                 createAccount: sinon.stub().returns(Promise.resolve()),
                 registerPreKeys: sinon.stub().returns(Promise.resolve())
             };
-            accountCreator = new AccountCreator(store, axolotl, axolotlCrypto, protocol);
+            accountCreator = new AccountCreator(store, axolotl, axolotlCrypto, protocol, 1337);
         });
         it("returns the correct local state", () => {
             return accountCreator.registerFirstDevice("+123", "999").then((localState) => {
@@ -149,7 +149,7 @@ describe("AccountCreator", () => {
         it("generates 100 pre keys starting at 0", () => {
             return accountCreator.registerFirstDevice("+123", "999").then(() => {
                 sinon.assert.calledOnce(axolotl.generatePreKeys);
-                sinon.assert.calledWith(axolotl.generatePreKeys, 0, 100);
+                sinon.assert.calledWith(axolotl.generatePreKeys, 0, 1337);
             });
         });
         it("stores the generated pre keys and last resort pre key", () => {
