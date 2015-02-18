@@ -46,10 +46,11 @@ function SignalingCipher(signalingCipherKey, signalingMacKey, crypto) {
         var encryptedBytes = encryptedIncomingPushMessageSignalBytes.slice(17, -10);
         var macBytes = encryptedIncomingPushMessageSignalBytes.slice(-10);
 
-        var incomingPushMessageSignalBytes = yield crypto.decrypt(signalingCipherKey, encryptedBytes, ivBytes);
+        var incomingPushMessageSignalBytes = yield Promise.resolve(
+            crypto.decrypt(signalingCipherKey, encryptedBytes, ivBytes));
 
         var bytesToMac = encryptedIncomingPushMessageSignalBytes.slice(0, -10);
-        var expectedMacBytes = yield crypto.hmac(signalingMacKey, bytesToMac);
+        var expectedMacBytes = yield Promise.resolve(crypto.hmac(signalingMacKey, bytesToMac));
         if (!ArrayBufferUtils.areEqual(macBytes, expectedMacBytes.slice(0, 10))) {
             // TODO: Better errors
             throw new Error("Invalid mac on incoming push message signal");
