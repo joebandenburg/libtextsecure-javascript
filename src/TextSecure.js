@@ -69,8 +69,8 @@ function TextSecure(store, serverEndpointHost, webSocketFactory, options) {
     var axol = axolotl({
         getLocalIdentityKeyPair: () => localState.identityKeyPair,
         getLocalRegistrationId: () => localState.registrationId,
-        getLocalSignedPreKeyPair: store.getLocalSignedPreKeyPair,
-        getLocalPreKeyPair: store.getLocalPreKeyPair
+        getLocalSignedPreKeyPair: store.getLocalSignedPreKeyPair.bind(store),
+        getLocalPreKeyPair: store.getLocalPreKeyPair.bind(store)
     });
     var httpEndpoint = (options.httpUseTls ? "https" : "http") + "://" + serverEndpointHost;
     var protocol = new Protocol(httpEndpoint, axios);

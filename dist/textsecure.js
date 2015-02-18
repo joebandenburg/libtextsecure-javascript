@@ -55,8 +55,8 @@
             'use strict';
             var $__src_47_TextSecure__;
             var TextSecure = ($__src_47_TextSecure__ = _require(13), $__src_47_TextSecure__ && $__src_47_TextSecure__.__esModule && $__src_47_TextSecure__ || { default: $__src_47_TextSecure__ }).default;
-            module.exports = function (store, endpoint) {
-                return new TextSecure(store, endpoint);
+            module.exports = function (store, serverEndpointHost, webSocketFactory, options) {
+                return new TextSecure(store, serverEndpointHost, webSocketFactory, options);
             };
         },
         function (module, exports) {
@@ -72,7 +72,7 @@
             var $__co__, $__Base64__;
             var co = ($__co__ = _require(37), $__co__ && $__co__.__esModule && $__co__ || { default: $__co__ }).default;
             var encode = ($__Base64__ = _require(4), $__Base64__ && $__Base64__.__esModule && $__Base64__ || { default: $__Base64__ }).encode;
-            function AccountCreator(store, axolotl, axolotlCrypto, protocol) {
+            function AccountCreator(store, axolotl, axolotlCrypto, protocol, preKeyGenerationCount) {
                 this.requestVerificationCode = function (number) {
                     return protocol.requestVerificationCode('sms', number);
                 };
@@ -168,7 +168,7 @@
                                 break;
                             case 38:
                                 $ctx.state = 40;
-                                return axolotl.generatePreKeys(0, 100);
+                                return axolotl.generatePreKeys(0, preKeyGenerationCount);
                             case 40:
                                 preKeys = $ctx.sent;
                                 $ctx.state = 42;
@@ -1646,7 +1646,7 @@
                                 break;
                             case 12:
                                 $ctx.state = 2;
-                                return crypto.decrypt(signalingCipherKey, encryptedBytes, ivBytes);
+                                return Promise.resolve(crypto.decrypt(signalingCipherKey, encryptedBytes, ivBytes));
                             case 2:
                                 incomingPushMessageSignalBytes = $ctx.sent;
                                 $ctx.state = 4;
@@ -1657,7 +1657,7 @@
                                 break;
                             case 14:
                                 $ctx.state = 6;
-                                return crypto.hmac(signalingMacKey, bytesToMac);
+                                return Promise.resolve(crypto.hmac(signalingMacKey, bytesToMac));
                             case 6:
                                 expectedMacBytes = $ctx.sent;
                                 $ctx.state = 8;
@@ -1701,7 +1701,7 @@
             var axolotlCrypto = ($__axolotl_45_crypto__ = _require(35), $__axolotl_45_crypto__ && $__axolotl_45_crypto__.__esModule && $__axolotl_45_crypto__ || { default: $__axolotl_45_crypto__ }).default;
             var axios = ($__axios__ = _require(18), $__axios__ && $__axios__.__esModule && $__axios__ || { default: $__axios__ }).default;
             var co = ($__co__ = _require(37), $__co__ && $__co__.__esModule && $__co__ || { default: $__co__ }).default;
-            function TextSecure(store, endpoint) {
+            function TextSecure(store, serverEndpointHost, webSocketFactory, options) {
                 this.onmessage = function () {
                 };
                 this.onreceipt = function () {
@@ -1789,6 +1789,11 @@
                             }
                     }, $__15, this);
                 }));
+                options = Object.assign({}, {
+                    httpUseTls: true,
+                    webSocketUseTls: true,
+                    initialPreKeyGenerationCount: 100
+                }, options);
                 var axol = axolotl({
                         getLocalIdentityKeyPair: function () {
                             return localState.identityKeyPair;
@@ -1796,11 +1801,12 @@
                         getLocalRegistrationId: function () {
                             return localState.registrationId;
                         },
-                        getLocalSignedPreKeyPair: store.getLocalSignedPreKeyPair,
-                        getLocalPreKeyPair: store.getLocalPreKeyPair
+                        getLocalSignedPreKeyPair: store.getLocalSignedPreKeyPair.bind(store),
+                        getLocalPreKeyPair: store.getLocalPreKeyPair.bind(store)
                     });
-                var protocol = new Protocol('https://' + endpoint, axios);
-                var accountCreator = new AccountCreator(store, axol, axolotlCrypto, protocol);
+                var httpEndpoint = (options.httpUseTls ? 'https' : 'http') + '://' + serverEndpointHost;
+                var protocol = new Protocol(httpEndpoint, axios);
+                var accountCreator = new AccountCreator(store, axol, axolotlCrypto, protocol, options.initialPreKeyGenerationCount);
                 var localState = null;
                 var setupPromise = store.getLocalState().then(function (state) {
                         if (state) {
@@ -1825,17 +1831,10 @@
                     var messageReceiver = new MessageReceiver(store, axol, signalingCipher);
                     messageReceiver.onpushmessagecontent = self.onmessage;
                     messageReceiver.onreceipt = self.onreceipt;
-                    var wsUrl = 'wss://' + endpoint + '/v1/websocket/?login=' + encodeURIComponent(localState.auth.number) + '.' + encodeURIComponent(localState.auth.device) + '&password=' + encodeURIComponent(localState.auth.password);
-                    var webSocket = new WebSocket(wsUrl);
-                    var wrappedWebSocket = { send: webSocket.send.bind(webSocket) };
-                    webSocket.onmessage = function (event) {
-                        var reader = new FileReader();
-                        reader.onload = function () {
-                            wrappedWebSocket.onmessage(reader.result);
-                        };
-                        reader.readAsArrayBuffer(event.data);
-                    };
-                    var transport = new WebSocketPushTransport(wrappedWebSocket);
+                    var wsEndpoint = (options.webSocketUseTls ? 'wss' : 'ws') + '://' + serverEndpointHost;
+                    var wsUrl = wsEndpoint + '/v1/websocket/?login=' + encodeURIComponent(localState.auth.number) + '.' + encodeURIComponent(localState.auth.device) + '&password=' + encodeURIComponent(localState.auth.password);
+                    var webSocket = webSocketFactory.connect(wsUrl);
+                    var transport = new WebSocketPushTransport(webSocket);
                     transport.onmessage = messageReceiver.processIncomingMessageSignal;
                 };
                 var registered = function () {
@@ -3158,7 +3157,7 @@
                 'gitHead': 'fa6c26a0e5eaad5d58071eb39d7afff0c7dc051c',
                 '_id': 'axios@0.5.0',
                 '_shasum': '2f369e6309a46b182c38ce683ba4fbc608d5b4ef',
-                '_from': 'axios@',
+                '_from': 'axios@^0.5.0',
                 '_npmVersion': '2.1.6',
                 '_nodeVersion': '0.10.33',
                 '_npmUser': {
@@ -3187,9 +3186,11 @@
             var slice = Array.prototype.slice;
             module.exports = co['default'] = co.co = co;
             co.wrap = function (fn) {
-                return function () {
+                createPromise.__generatorFunction__ = fn;
+                return createPromise;
+                function createPromise() {
                     return co.call(this, fn.apply(this, arguments));
-                };
+                }
             };
             function co(gen) {
                 var ctx = this;
@@ -3285,11 +3286,11 @@
             }
             function isGeneratorFunction(obj) {
                 var constructor = obj.constructor;
-                var proto = constructor.prototype;
-                var name = constructor.displayName || constructor.name;
-                var nameLooksRight = 'GeneratorFunction' == name;
-                var methodsLooksRight = 'function' == typeof proto.next && 'function' == typeof proto.throw;
-                return nameLooksRight || methodsLooksRight;
+                if (!constructor)
+                    return false;
+                if ('GeneratorFunction' === constructor.name || 'GeneratorFunction' === constructor.displayName)
+                    return true;
+                return isGenerator(constructor.prototype);
             }
             function isObject(val) {
                 return Object == val.constructor;
