@@ -34,6 +34,6 @@
   "dependencies": {
     "protobuf": "~3.8.2",
     "traceur-runtime": "~0.0.83",
-    "axolotl": "~1.2.0"
+    "axolotl": "~1.3.0"
   }
 }

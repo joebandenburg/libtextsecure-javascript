@@ -49,12 +49,14 @@ function MessageReceiver(store, axolotl, signalingCipher) {
                 var {
                     contact,
                     device
-                } = yield getContactAndDevice(incomingPushMessageSignal.source,
-                    incomingPushMessageSignal.sourceDevice);
+                } = yield getContactAndDevice(incomingPushMessageSignal.source, incomingPushMessageSignal.sourceDevice);
                 var isPreKeyWhisperMessage = incomingPushMessageSignal.type === MessageType.PREKEY_BUNDLE;
                 var decryptionResult = yield decryptPushMessageContent(isPreKeyWhisperMessage,
                     incomingPushMessageSignal.message, device.axolotlSession);
                 device.axolotlSession = decryptionResult.session;
+                if (isPreKeyWhisperMessage) {
+                    device.registrationId = decryptionResult.registrationId;
+                }
                 var paddedPushMessageContentBytes = decryptionResult.message;
                 var pushMessageContentBytes = unpadMessage(paddedPushMessageContentBytes);
                 var pushMessageContent = PushMessageContentProto.decode(pushMessageContentBytes);

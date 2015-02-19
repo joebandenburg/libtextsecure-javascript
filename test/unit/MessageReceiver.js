@@ -21,7 +21,9 @@ describe("MessageReceiver", () => {
             message: new Uint8Array([10, 3, 72, 105, 33, 0x80]).buffer,
             session: {
                 data: 2
-            }
+            },
+            identityKey: new Uint8Array([0x11, 0x11, 0x11, 0x11]).buffer,
+            registrationId: 9999
         };
         var message;
         beforeEach(() => {
@@ -94,7 +96,8 @@ describe("MessageReceiver", () => {
                         identityKey: null,
                         devices: [{
                             id: 2,
-                            axolotlSession: decryptionResult.session
+                            axolotlSession: decryptionResult.session,
+                            registrationId: 9999
                         }]
                     }));
                 });
@@ -189,7 +192,8 @@ describe("MessageReceiver", () => {
                             axolotlSession: existingSession
                         }, {
                             id: 3,
-                            axolotlSession: decryptionResult.session
+                            axolotlSession: decryptionResult.session,
+                            registrationId: 9999
                         }]
                     }));
                 });
