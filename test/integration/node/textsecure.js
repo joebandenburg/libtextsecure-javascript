@@ -97,13 +97,55 @@ var webSocketFactory = {
     }
 };
 
-var textSecureOptions = {
-    httpUseTls: false,
-    webSocketUseTls: false,
-    initialPreKeyGenerationCount: 1
+function Client(number) {
+    var self = this;
+
+    this.number = number;
+
+    this.store = new InMemoryClientStore();
+    this.ts = textsecure(this.store, "127.0.0.1:8080", webSocketFactory, {
+        httpUseTls: false,
+        webSocketUseTls: false,
+        initialPreKeyGenerationCount: 2
+    });
+    this.ts.onmessage = function() {
+        self.onmessage.apply(self, arguments);
+    };
+    sinon.spy(this.ts, "onmessage");
+}
+
+var send = function(fromClient, toClient, message) {
+    return function() {
+        return fromClient.ts.sendMessage(toClient.number, message);
+    };
+};
+
+var waitForMessage = function(client) {
+    return function() {
+        return new Promise(function(resolve) {
+            client.onmessage = resolve;
+        });
+    };
+};
+
+var register = function(client) {
+    return function() {
+        return client.ts.requestVerificationCode(client.number).then(function() {
+            return client.ts.registerFirstDevice(client.number, "123123");
+        });
+    };
+};
+
+var execute = function(commands) {
+    return commands.reduce(function(previousValue, currentValue) {
+        return previousValue.then(function() {
+            return currentValue();
+        });
+    }, Promise.resolve());
 };
 
 describe("integration node", function() {
+    this.timeout(10000);
     var server;
     var serverStore;
     var clock;
@@ -116,28 +158,35 @@ describe("integration node", function() {
         clock.restore();
         server.close();
     });
-    it("can send a message between two clients", function() {
-        var aliceNumber = "+447100000001";
-        var aliceStore = new InMemoryClientStore();
-        var alice = textsecure(aliceStore, "127.0.0.1:8080", webSocketFactory, textSecureOptions);
-        var bobNumber = "+447100000002";
-        var bobStore = new InMemoryClientStore();
-        var bob = textsecure(bobStore, "127.0.0.1:8080", webSocketFactory, textSecureOptions);
-        var receivedMessagePromise = new Promise(function(resolve) {
-            bob.onmessage = resolve;
-            sinon.spy(bob, "onmessage");
+    describe("private conversation", function() {
+        var alice;
+        var bob;
+
+        beforeEach(function() {
+            alice = new Client("+447100000001");
+            bob = new Client("+447100000002");
         });
-        alice.requestVerificationCode(aliceNumber).then(function() {
-            return alice.registerFirstDevice(aliceNumber, "123123");
-        }).then(function() {
-            return bob.requestVerificationCode(bobNumber);
-        }).then(function() {
-            return bob.registerFirstDevice(bobNumber, "123123");
-        }).then(function() {
-            return alice.sendMessage(bobNumber, "Hello World!");
+        it("can send a message between two clients", function() {
+            return execute([
+                register(alice),
+                register(bob),
+                send(alice, bob, "Hello World!"),
+                waitForMessage(bob)
+            ]).then(function() {
+                sinon.assert.calledWithExactly(bob.ts.onmessage, alice.number, "Hello World!", 100100100);
+            });
         });
-        return receivedMessagePromise.then(function() {
-            sinon.assert.calledWithExactly(bob.onmessage, "+447100000001", "Hello World!", 100100100);
+        it("can send a reply", function() {
+            return execute([
+                register(alice),
+                register(bob),
+                send(alice, bob, "Hello World!"),
+                waitForMessage(bob),
+                send(bob, alice, "Right back at ya"),
+                waitForMessage(alice)
+            ]).then(function() {
+                sinon.assert.calledWithExactly(alice.ts.onmessage, bob.number, "Right back at ya", 100100100);
+            });
         });
     });
 });

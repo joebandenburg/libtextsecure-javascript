@@ -103,7 +103,9 @@ function TextSecure(store, serverEndpointHost, webSocketFactory, options) {
         var signalingCipher = new SignalingCipher(localState.signalingKey.cipher, localState.signalingKey.mac,
             axolotlCrypto);
         var messageReceiver = new MessageReceiver(store, axol, signalingCipher);
-        messageReceiver.onpushmessagecontent = self.onmessage;
+        messageReceiver.onpushmessagecontent = function() {
+            self.onmessage.apply(self, arguments);
+        };
         messageReceiver.onreceipt = self.onreceipt;
 
         var wsEndpoint = (options.webSocketUseTls ? "wss" : "ws") + "://" + serverEndpointHost;
