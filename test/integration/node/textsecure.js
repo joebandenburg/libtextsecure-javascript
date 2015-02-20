@@ -111,7 +111,11 @@ function Client(number) {
     this.ts.onmessage = function() {
         self.onmessage.apply(self, arguments);
     };
+    this.ts.onreceipt = function() {
+        self.onreceipt.apply(self, arguments);
+    };
     sinon.spy(this.ts, "onmessage");
+    sinon.spy(this.ts, "onreceipt");
 }
 
 var send = function(fromClient, toClient, message) {
@@ -124,6 +128,14 @@ var waitForMessage = function(client) {
     return function() {
         return new Promise(function(resolve) {
             client.onmessage = resolve;
+        });
+    };
+};
+
+var waitForReceipt = function(client) {
+    return function() {
+        return new Promise(function(resolve) {
+            client.onreceipt = resolve;
         });
     };
 };
@@ -186,6 +198,16 @@ describe("integration node", function() {
                 waitForMessage(alice)
             ]).then(function() {
                 sinon.assert.calledWithExactly(alice.ts.onmessage, bob.number, "Right back at ya", 100100100);
+            });
+        });
+        it("can receive a delivery receipt after sending a message", function() {
+            return execute([
+                register(alice),
+                register(bob),
+                send(alice, bob, "Hello World!"),
+                waitForReceipt(alice)
+            ]).then(function() {
+                sinon.assert.calledWithExactly(alice.ts.onreceipt, bob.number, 100100100);
             });
         });
         it("tolerates initiating client re-registering and then sending a message", function() {

@@ -106,7 +106,9 @@ function TextSecure(store, serverEndpointHost, webSocketFactory, options) {
         messageReceiver.onpushmessagecontent = function() {
             self.onmessage.apply(self, arguments);
         };
-        messageReceiver.onreceipt = self.onreceipt;
+        messageReceiver.onreceipt = function() {
+            self.onreceipt.apply(self, arguments);
+        };
 
         var wsEndpoint = (options.webSocketUseTls ? "wss" : "ws") + "://" + serverEndpointHost;
         var wsUrl = wsEndpoint + "/v1/websocket/?login=" +
