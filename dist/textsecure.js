@@ -872,6 +872,9 @@
                                 return store.putContact(incomingPushMessageSignal.source, contact);
                             case 16:
                                 device.axolotlSession = decryptionResult.session;
+                                if (isPreKeyWhisperMessage) {
+                                    device.registrationId = decryptionResult.registrationId;
+                                }
                                 paddedPushMessageContentBytes = decryptionResult.message;
                                 pushMessageContentBytes = unpadMessage(paddedPushMessageContentBytes);
                                 pushMessageContent = PushMessageContentProto.decode(pushMessageContentBytes);
@@ -1063,8 +1066,8 @@
             var paddingBlockSize = 160;
             var sendMessageRetryAttemptLimit = 5;
             function MessageSender(store, axolotl, protocol) {
-                this.sendMessage = co.wrap($traceurRuntime.initGeneratorFunction(function $__8(toNumber, messageText, attachments) {
-                    var paddedPushMessageContentBytes, hasContact, preKeys, newContact, contact, timestamp, sendMessageToContact, attemptToSendMessageToContact, $__27, $__28, $__29, $__30;
+                this.sendMessage = co.wrap($traceurRuntime.initGeneratorFunction(function $__8(toNumber, messageText, timestamp, attachments) {
+                    var paddedPushMessageContentBytes, hasContact, preKeys, newContact, contact, sendMessageToContact, attemptToSendMessageToContact, $__27, $__28, $__29, $__30;
                     return $traceurRuntime.createGeneratorInstance(function ($ctx) {
                         while (true)
                             switch ($ctx.state) {
@@ -1128,7 +1131,6 @@
                                 $ctx.state = 27;
                                 break;
                             case 27:
-                                timestamp = Date.now();
                                 sendMessageToContact = co.wrap($traceurRuntime.initGeneratorFunction(function $__9() {
                                     var messages;
                                     return $traceurRuntime.createGeneratorInstance(function ($ctx) {
@@ -1706,7 +1708,7 @@
                 };
                 this.onreceipt = function () {
                 };
-                this.sendMessage = co.wrap($traceurRuntime.initGeneratorFunction(function $__10(number, message, attachments) {
+                this.sendMessage = co.wrap($traceurRuntime.initGeneratorFunction(function $__10(number, message, timestamp, attachments) {
                     return $traceurRuntime.createGeneratorInstance(function ($ctx) {
                         while (true)
                             switch ($ctx.state) {
@@ -1719,7 +1721,7 @@
                                 break;
                             case 4:
                                 $ctx.state = 6;
-                                return messageSender.sendMessage(number, message, attachments);
+                                return messageSender.sendMessage(number, message, timestamp, attachments);
                             case 6:
                                 $ctx.maybeThrow();
                                 $ctx.state = -2;
@@ -1829,8 +1831,12 @@
                     messageSender = new MessageSender(store, axol, authenticatedProtocol);
                     var signalingCipher = new SignalingCipher(localState.signalingKey.cipher, localState.signalingKey.mac, axolotlCrypto);
                     var messageReceiver = new MessageReceiver(store, axol, signalingCipher);
-                    messageReceiver.onpushmessagecontent = self.onmessage;
-                    messageReceiver.onreceipt = self.onreceipt;
+                    messageReceiver.onpushmessagecontent = function () {
+                        self.onmessage.apply(self, arguments);
+                    };
+                    messageReceiver.onreceipt = function () {
+                        self.onreceipt.apply(self, arguments);
+                    };
                     var wsEndpoint = (options.webSocketUseTls ? 'wss' : 'ws') + '://' + serverEndpointHost;
                     var wsUrl = wsEndpoint + '/v1/websocket/?login=' + encodeURIComponent(localState.auth.number) + '.' + encodeURIComponent(localState.auth.device) + '&password=' + encodeURIComponent(localState.auth.password);
                     var webSocket = webSocketFactory.connect(wsUrl);
@@ -3157,7 +3163,7 @@
                 'gitHead': 'fa6c26a0e5eaad5d58071eb39d7afff0c7dc051c',
                 '_id': 'axios@0.5.0',
                 '_shasum': '2f369e6309a46b182c38ce683ba4fbc608d5b4ef',
-                '_from': 'axios@^0.5.0',
+                '_from': 'axios@',
                 '_npmVersion': '2.1.6',
                 '_nodeVersion': '0.10.33',
                 '_npmUser': {

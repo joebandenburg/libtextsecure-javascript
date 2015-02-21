@@ -118,9 +118,9 @@ function Client(number) {
     sinon.spy(this.ts, "onreceipt");
 }
 
-var send = function(fromClient, toClient, message) {
+var send = function(fromClient, toClient, message, timestamp) {
     return function() {
-        return fromClient.ts.sendMessage(toClient.number, message);
+        return fromClient.ts.sendMessage(toClient.number, message, timestamp);
     };
 };
 
@@ -161,13 +161,12 @@ describe("integration node", function() {
     var server;
     var serverStore;
     var clock;
+    var timestamp = 100100100;
     beforeEach(function() {
-        clock = sinon.useFakeTimers(100100100);
         serverStore = new InMemoryServerStore();
         server = new Server(serverStore, 8080);
     });
     afterEach(function() {
-        clock.restore();
         server.close();
     });
     describe("private conversation", function() {
@@ -182,32 +181,32 @@ describe("integration node", function() {
             return execute([
                 register(alice),
                 register(bob),
-                send(alice, bob, "Hello World!"),
+                send(alice, bob, "Hello World!", timestamp),
                 waitForMessage(bob)
             ]).then(function() {
-                sinon.assert.calledWithExactly(bob.ts.onmessage, alice.number, "Hello World!", 100100100);
+                sinon.assert.calledWithExactly(bob.ts.onmessage, alice.number, "Hello World!", timestamp);
             });
         });
         it("can send a reply", function() {
             return execute([
                 register(alice),
                 register(bob),
-                send(alice, bob, "Hello World!"),
+                send(alice, bob, "Hello World!", 123),
                 waitForMessage(bob),
-                send(bob, alice, "Right back at ya"),
+                send(bob, alice, "Right back at ya", timestamp),
                 waitForMessage(alice)
             ]).then(function() {
-                sinon.assert.calledWithExactly(alice.ts.onmessage, bob.number, "Right back at ya", 100100100);
+                sinon.assert.calledWithExactly(alice.ts.onmessage, bob.number, "Right back at ya", timestamp);
             });
         });
         it("can receive a delivery receipt after sending a message", function() {
             return execute([
                 register(alice),
                 register(bob),
-                send(alice, bob, "Hello World!"),
+                send(alice, bob, "Hello World!", timestamp),
                 waitForReceipt(alice)
             ]).then(function() {
-                sinon.assert.calledWithExactly(alice.ts.onreceipt, bob.number, 100100100);
+                sinon.assert.calledWithExactly(alice.ts.onreceipt, bob.number, timestamp);
             });
         });
         it("tolerates initiating client re-registering and then sending a message", function() {
@@ -215,17 +214,17 @@ describe("integration node", function() {
             return execute([
                 register(alice),
                 register(bob),
-                send(alice, bob, "Hello World!"),
+                send(alice, bob, "Hello World!", 121),
                 waitForMessage(bob),
-                send(bob, alice, "Right back at ya"),
+                send(bob, alice, "Right back at ya", 122),
                 waitForMessage(alice),
                 register(eve),
-                send(eve, bob, "I'm a whole new person"),
+                send(eve, bob, "I'm a whole new person", 123),
                 waitForMessage(bob),
-                send(bob, eve, "That's bad"),
+                send(bob, eve, "That's bad", timestamp),
                 waitForMessage(eve)
             ]).then(function() {
-                sinon.assert.calledWithExactly(eve.ts.onmessage, bob.number, "That's bad", 100100100);
+                sinon.assert.calledWithExactly(eve.ts.onmessage, bob.number, "That's bad", timestamp);
             });
         });
         it("tolerates initiating client re-registering and receiving a message", function() {
@@ -233,15 +232,15 @@ describe("integration node", function() {
             return execute([
                 register(alice),
                 register(bob),
-                send(alice, bob, "Hello World!"),
+                send(alice, bob, "Hello World!", 122),
                 waitForMessage(bob),
-                send(bob, alice, "Right back at ya"),
+                send(bob, alice, "Right back at ya", 123),
                 waitForMessage(alice),
                 register(eve),
-                send(bob, eve, "That's bad"),
+                send(bob, eve, "That's bad", timestamp),
                 waitForMessage(eve)
             ]).then(function() {
-                sinon.assert.calledWithExactly(eve.ts.onmessage, bob.number, "That's bad", 100100100);
+                sinon.assert.calledWithExactly(eve.ts.onmessage, bob.number, "That's bad", timestamp);
             });
         });
         it("tolerates not-initiating client re-registering and sending a message", function() {
@@ -249,17 +248,17 @@ describe("integration node", function() {
             return execute([
                 register(alice),
                 register(bob),
-                send(alice, bob, "Hello World!"),
+                send(alice, bob, "Hello World!", 121),
                 waitForMessage(bob),
-                send(bob, alice, "Right back at ya"),
+                send(bob, alice, "Right back at ya", 122),
                 waitForMessage(alice),
                 register(eve),
-                send(eve, alice, "I'm a whole new person"),
+                send(eve, alice, "I'm a whole new person", 123),
                 waitForMessage(alice),
-                send(alice, eve, "That's bad"),
+                send(alice, eve, "That's bad", timestamp),
                 waitForMessage(eve)
             ]).then(function() {
-                sinon.assert.calledWithExactly(eve.ts.onmessage, alice.number, "That's bad", 100100100);
+                sinon.assert.calledWithExactly(eve.ts.onmessage, alice.number, "That's bad", timestamp);
             });
         });
         it("tolerates not-initiating client re-registering and receiving a message", function() {
@@ -267,15 +266,15 @@ describe("integration node", function() {
             return execute([
                 register(alice),
                 register(bob),
-                send(alice, bob, "Hello World!"),
+                send(alice, bob, "Hello World!", 122),
                 waitForMessage(bob),
-                send(bob, alice, "Right back at ya"),
+                send(bob, alice, "Right back at ya", 123),
                 waitForMessage(alice),
                 register(eve),
-                send(alice, eve, "That's bad"),
+                send(alice, eve, "That's bad", timestamp),
                 waitForMessage(eve)
             ]).then(function() {
-                sinon.assert.calledWithExactly(eve.ts.onmessage, alice.number, "That's bad", 100100100);
+                sinon.assert.calledWithExactly(eve.ts.onmessage, alice.number, "That's bad", timestamp);
             });
         });
     });

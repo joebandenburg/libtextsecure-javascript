@@ -48,7 +48,7 @@ var paddingBlockSize = 160;
 var sendMessageRetryAttemptLimit = 5;
 
 function MessageSender(store, axolotl, protocol) {
-    this.sendMessage = co.wrap(function*(toNumber, messageText, attachments) {
+    this.sendMessage = co.wrap(function*(toNumber, messageText, timestamp, attachments) {
         var paddedPushMessageContentBytes = constructMessageContent(messageText, attachments);
 
         var hasContact = yield store.hasContact(toNumber);
@@ -63,7 +63,6 @@ function MessageSender(store, axolotl, protocol) {
         }
 
         var contact = new Contact(yield store.getContact(toNumber));
-        var timestamp = Date.now();
 
         var sendMessageToContact = co.wrap(function*() {
             var messages = yield contact.devices.map(co.wrap(function*(device) {

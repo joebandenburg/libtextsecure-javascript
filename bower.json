@@ -1,7 +1,7 @@
 {
   "name": "textsecure",
   "main": "dist/textsecure.js",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "authors": [
     "Joe Bandenburg <joe@bandenburg.com>"
   ],

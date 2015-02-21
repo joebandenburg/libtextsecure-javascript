@@ -48,7 +48,6 @@ describe("MessageSender", () => {
             session: {}
         };
         var messageSender;
-        var sandbox;
         beforeEach(() => {
             preKeys = {
                 identityKey: decode("abcd"),
@@ -69,11 +68,7 @@ describe("MessageSender", () => {
                 createSessionFromPreKeyBundle: sinon.stub().returns(Promise.resolve(axolotlSession)),
                 encryptMessage: sinon.stub().returns(Promise.resolve(encryptedMessage))
             };
-            sandbox = sinon.sandbox.create();
             messageSender = new MessageSender(store, axolotl, protocol);
-        });
-        afterEach(() => {
-            sandbox.restore();
         });
         it("submits a message to the correct number", co.wrap(function*() {
             yield messageSender.sendMessage("+447000000001", "Hello world!");
@@ -100,6 +95,11 @@ describe("MessageSender", () => {
             yield messageSender.sendMessage("+447000000001", "Hello world!");
             var args = protocol.submitMessage.firstCall.args;
             assert.ok(ArrayBufferUtils.areEqual(args[1][0].body, new Uint8Array([1, 2, 3, 4]).buffer));
+        }));
+        it("uses the correct timestamp", co.wrap(function*() {
+            yield messageSender.sendMessage("+447000000001", "Hello world!", 100100);
+            var args = protocol.submitMessage.firstCall.args;
+            assert.equal(args[1][0].timestamp, 100100);
         }));
         it("requests pre keys for contact if the contact didn't previously exist", co.wrap(function*() {
             yield messageSender.sendMessage("+447000000001", "Hello world!");
@@ -174,9 +174,8 @@ describe("MessageSender", () => {
             assert.equal(messages.length, 2);
         }));
         it("uses the same timestamp for every device", co.wrap(function*() {
-            sandbox.stub(Date, "now", () => Math.random());
             preKeys.devices.push(device2);
-            yield messageSender.sendMessage("+447000000001", "Hello world!");
+            yield messageSender.sendMessage("+447000000001", "Hello world!", 100100);
             var messages = protocol.submitMessage.firstCall.args[1];
             assert.equal(messages[0].timestamp, messages[1].timestamp);
         }));

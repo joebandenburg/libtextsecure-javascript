@@ -35,9 +35,9 @@ function TextSecure(store, serverEndpointHost, webSocketFactory, options) {
      * @method
      * @param {String} number - An E164 phone number
      */
-    this.sendMessage = co.wrap(function*(number, message, attachments) {
+    this.sendMessage = co.wrap(function*(number, message, timestamp, attachments) {
         yield checkIsRegistered();
-        yield messageSender.sendMessage(number, message, attachments);
+        yield messageSender.sendMessage(number, message, timestamp, attachments);
     });
 
     /**
