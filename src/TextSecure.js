@@ -21,6 +21,7 @@ import MessageReceiver from "./MessageReceiver";
 import Protocol from "./Protocol";
 import SignalingCipher from "./SignalingCipher";
 import WebSocketPushTransport from "./WebSocketPushTransport";
+import AutoReconnectingWebSocket from "./AutoReconnectingWebSocket";
 
 import axolotl from "axolotl";
 import axolotlCrypto from "axolotl-crypto";
@@ -115,7 +116,7 @@ function TextSecure(store, serverEndpointHost, webSocketFactory, options) {
             encodeURIComponent(localState.auth.number) + "." + encodeURIComponent(localState.auth.device) +
             "&password=" + encodeURIComponent(localState.auth.password);
 
-        var webSocket = webSocketFactory.connect(wsUrl);
+        var webSocket = new AutoReconnectingWebSocket(webSocketFactory, wsUrl);
         var transport = new WebSocketPushTransport(webSocket);
         transport.onmessage = messageReceiver.processIncomingMessageSignal;
     };

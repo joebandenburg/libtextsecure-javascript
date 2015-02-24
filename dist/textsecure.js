@@ -54,7 +54,7 @@
         function (module, exports) {
             'use strict';
             var $__src_47_TextSecure__;
-            var TextSecure = ($__src_47_TextSecure__ = _require(13), $__src_47_TextSecure__ && $__src_47_TextSecure__.__esModule && $__src_47_TextSecure__ || { default: $__src_47_TextSecure__ }).default;
+            var TextSecure = ($__src_47_TextSecure__ = _require(14), $__src_47_TextSecure__ && $__src_47_TextSecure__.__esModule && $__src_47_TextSecure__ || { default: $__src_47_TextSecure__ }).default;
             module.exports = function (store, serverEndpointHost, webSocketFactory, options) {
                 return new TextSecure(store, serverEndpointHost, webSocketFactory, options);
             };
@@ -70,8 +70,8 @@
                 __esModule: { value: true }
             });
             var $__co__, $__Base64__;
-            var co = ($__co__ = _require(37), $__co__ && $__co__.__esModule && $__co__ || { default: $__co__ }).default;
-            var encode = ($__Base64__ = _require(4), $__Base64__ && $__Base64__.__esModule && $__Base64__ || { default: $__Base64__ }).encode;
+            var co = ($__co__ = _require(38), $__co__ && $__co__.__esModule && $__co__ || { default: $__co__ }).default;
+            var encode = ($__Base64__ = _require(5), $__Base64__ && $__Base64__.__esModule && $__Base64__ || { default: $__Base64__ }).encode;
             function AccountCreator(store, axolotl, axolotlCrypto, protocol, preKeyGenerationCount) {
                 this.requestVerificationCode = function (number) {
                     return protocol.requestVerificationCode('sms', number);
@@ -278,6 +278,57 @@
                         return true;
                     }
                 };
+        },
+        function (module, exports) {
+            'use strict';
+            Object.defineProperties(module.exports, {
+                default: {
+                    get: function () {
+                        return $__default;
+                    }
+                },
+                __esModule: { value: true }
+            });
+            var autoReconnectThrottleMilliseconds = 5000;
+            function AutoReconnectingWebSocket(webSocketFactory, url) {
+                this.send = function (data) {
+                    webSocket.send(data);
+                };
+                var webSocket;
+                var self = this;
+                var createWebSocket = throttle(function () {
+                        webSocket = webSocketFactory.connect(url);
+                        webSocket.onclose = createWebSocket;
+                        webSocket.onmessage = function () {
+                            self.onmessage.apply(self, arguments);
+                        };
+                    }, autoReconnectThrottleMilliseconds);
+                createWebSocket();
+            }
+            function throttle(func, waitMilliseconds) {
+                var previous = 0;
+                return function () {
+                    var $__0 = arguments, $__1 = this;
+                    var timeout = null;
+                    var now = Date.now();
+                    var remaining = waitMilliseconds - (now - previous);
+                    if (remaining <= 0 || remaining > waitMilliseconds) {
+                        if (timeout) {
+                            clearTimeout(timeout);
+                            timeout = null;
+                        }
+                        previous = now;
+                        func.apply(this, arguments);
+                    } else {
+                        timeout = setTimeout(function () {
+                            previous = Date.now();
+                            timeout = null;
+                            func.apply($__1, $__0);
+                        }, remaining);
+                    }
+                };
+            }
+            var $__default = AutoReconnectingWebSocket;
         },
         function (module, exports) {
             'use strict';
@@ -529,7 +580,7 @@
         },
         function (module, exports) {
             'use strict';
-            module.exports = _require(38).newBuilder({})['import']({
+            module.exports = _require(39).newBuilder({})['import']({
                 'package': 'textsecure',
                 'messages': [
                     {
@@ -815,10 +866,10 @@
                 __esModule: { value: true }
             });
             var $__IncomingPushMessageSignalProtos__, $__MessagePadder__, $__Contact__, $__co__;
-            var IncomingPushMessageSignalProtos = ($__IncomingPushMessageSignalProtos__ = _require(7), $__IncomingPushMessageSignalProtos__ && $__IncomingPushMessageSignalProtos__.__esModule && $__IncomingPushMessageSignalProtos__ || { default: $__IncomingPushMessageSignalProtos__ }).default;
-            var unpadMessage = ($__MessagePadder__ = _require(8), $__MessagePadder__ && $__MessagePadder__.__esModule && $__MessagePadder__ || { default: $__MessagePadder__ }).unpadMessage;
-            var Contact = ($__Contact__ = _require(5), $__Contact__ && $__Contact__.__esModule && $__Contact__ || { default: $__Contact__ }).default;
-            var co = ($__co__ = _require(37), $__co__ && $__co__.__esModule && $__co__ || { default: $__co__ }).default;
+            var IncomingPushMessageSignalProtos = ($__IncomingPushMessageSignalProtos__ = _require(8), $__IncomingPushMessageSignalProtos__ && $__IncomingPushMessageSignalProtos__.__esModule && $__IncomingPushMessageSignalProtos__ || { default: $__IncomingPushMessageSignalProtos__ }).default;
+            var unpadMessage = ($__MessagePadder__ = _require(9), $__MessagePadder__ && $__MessagePadder__.__esModule && $__MessagePadder__ || { default: $__MessagePadder__ }).unpadMessage;
+            var Contact = ($__Contact__ = _require(6), $__Contact__ && $__Contact__.__esModule && $__Contact__ || { default: $__Contact__ }).default;
+            var co = ($__co__ = _require(38), $__co__ && $__co__.__esModule && $__co__ || { default: $__co__ }).default;
             var IncomingPushMessageSignalProto = IncomingPushMessageSignalProtos.IncomingPushMessageSignal;
             var MessageType = IncomingPushMessageSignalProto.Type;
             var PushMessageContentProto = IncomingPushMessageSignalProtos.PushMessageContent;
@@ -1054,13 +1105,13 @@
                 __esModule: { value: true }
             });
             var $__IncomingPushMessageSignalProtos__, $__Protocol__, $__MessagePadder__, $__Exceptions__, $__Contact__, $__axolotl__, $__co__;
-            var IncomingPushMessageSignalProtos = ($__IncomingPushMessageSignalProtos__ = _require(7), $__IncomingPushMessageSignalProtos__ && $__IncomingPushMessageSignalProtos__.__esModule && $__IncomingPushMessageSignalProtos__ || { default: $__IncomingPushMessageSignalProtos__ }).default;
-            var Protocol = ($__Protocol__ = _require(11), $__Protocol__ && $__Protocol__.__esModule && $__Protocol__ || { default: $__Protocol__ }).default;
-            var padMessage = ($__MessagePadder__ = _require(8), $__MessagePadder__ && $__MessagePadder__.__esModule && $__MessagePadder__ || { default: $__MessagePadder__ }).padMessage;
-            var $__3 = ($__Exceptions__ = _require(6), $__Exceptions__ && $__Exceptions__.__esModule && $__Exceptions__ || { default: $__Exceptions__ }), MismatchedDevicesException = $__3.MismatchedDevicesException, StaleDevicesException = $__3.StaleDevicesException;
-            var Contact = ($__Contact__ = _require(5), $__Contact__ && $__Contact__.__esModule && $__Contact__ || { default: $__Contact__ }).default;
-            var Axolotl = ($__axolotl__ = _require(36), $__axolotl__ && $__axolotl__.__esModule && $__axolotl__ || { default: $__axolotl__ }).default;
-            var co = ($__co__ = _require(37), $__co__ && $__co__.__esModule && $__co__ || { default: $__co__ }).default;
+            var IncomingPushMessageSignalProtos = ($__IncomingPushMessageSignalProtos__ = _require(8), $__IncomingPushMessageSignalProtos__ && $__IncomingPushMessageSignalProtos__.__esModule && $__IncomingPushMessageSignalProtos__ || { default: $__IncomingPushMessageSignalProtos__ }).default;
+            var Protocol = ($__Protocol__ = _require(12), $__Protocol__ && $__Protocol__.__esModule && $__Protocol__ || { default: $__Protocol__ }).default;
+            var padMessage = ($__MessagePadder__ = _require(9), $__MessagePadder__ && $__MessagePadder__.__esModule && $__MessagePadder__ || { default: $__MessagePadder__ }).padMessage;
+            var $__3 = ($__Exceptions__ = _require(7), $__Exceptions__ && $__Exceptions__.__esModule && $__Exceptions__ || { default: $__Exceptions__ }), MismatchedDevicesException = $__3.MismatchedDevicesException, StaleDevicesException = $__3.StaleDevicesException;
+            var Contact = ($__Contact__ = _require(6), $__Contact__ && $__Contact__.__esModule && $__Contact__ || { default: $__Contact__ }).default;
+            var Axolotl = ($__axolotl__ = _require(37), $__axolotl__ && $__axolotl__.__esModule && $__axolotl__ || { default: $__axolotl__ }).default;
+            var co = ($__co__ = _require(38), $__co__ && $__co__.__esModule && $__co__ || { default: $__co__ }).default;
             var IncomingPushMessageSignalProto = IncomingPushMessageSignalProtos.IncomingPushMessageSignal;
             var PushMessageContentProto = IncomingPushMessageSignalProtos.PushMessageContent;
             var paddingBlockSize = 160;
@@ -1446,8 +1497,8 @@
                 __esModule: { value: true }
             });
             var $__Exceptions__, $__Base64__;
-            var $__0 = ($__Exceptions__ = _require(6), $__Exceptions__ && $__Exceptions__.__esModule && $__Exceptions__ || { default: $__Exceptions__ }), NoSuchContactException = $__0.NoSuchContactException, InvalidCredentialsException = $__0.InvalidCredentialsException, MismatchedDevicesException = $__0.MismatchedDevicesException, StaleDevicesException = $__0.StaleDevicesException, BadlyFormattedMessageBodyException = $__0.BadlyFormattedMessageBodyException, IncorrectVerificationCodeException = $__0.IncorrectVerificationCodeException, NumberAlreadyRegisteredException = $__0.NumberAlreadyRegisteredException;
-            var $__1 = ($__Base64__ = _require(4), $__Base64__ && $__Base64__.__esModule && $__Base64__ || { default: $__Base64__ }), encode = $__1.encode, encodeStr = $__1.encodeStr, decode = $__1.decode;
+            var $__0 = ($__Exceptions__ = _require(7), $__Exceptions__ && $__Exceptions__.__esModule && $__Exceptions__ || { default: $__Exceptions__ }), NoSuchContactException = $__0.NoSuchContactException, InvalidCredentialsException = $__0.InvalidCredentialsException, MismatchedDevicesException = $__0.MismatchedDevicesException, StaleDevicesException = $__0.StaleDevicesException, BadlyFormattedMessageBodyException = $__0.BadlyFormattedMessageBodyException, IncorrectVerificationCodeException = $__0.IncorrectVerificationCodeException, NumberAlreadyRegisteredException = $__0.NumberAlreadyRegisteredException;
+            var $__1 = ($__Base64__ = _require(5), $__Base64__ && $__Base64__.__esModule && $__Base64__ || { default: $__Base64__ }), encode = $__1.encode, encodeStr = $__1.encodeStr, decode = $__1.decode;
             var maxRetries = 5;
             var RetryableException = function RetryableException(otherException) {
                 this.otherException = otherException;
@@ -1626,7 +1677,7 @@
             });
             var $__ArrayBufferUtils__, $__co__;
             var ArrayBufferUtils = ($__ArrayBufferUtils__ = _require(3), $__ArrayBufferUtils__ && $__ArrayBufferUtils__.__esModule && $__ArrayBufferUtils__ || { default: $__ArrayBufferUtils__ }).default;
-            var co = ($__co__ = _require(37), $__co__ && $__co__.__esModule && $__co__ || { default: $__co__ }).default;
+            var co = ($__co__ = _require(38), $__co__ && $__co__.__esModule && $__co__ || { default: $__co__ }).default;
             function SignalingCipher(signalingCipherKey, signalingMacKey, crypto) {
                 this.decrypt = co.wrap($traceurRuntime.initGeneratorFunction(function $__2(encryptedIncomingPushMessageSignalBytes) {
                     var versionByte, ivBytes, encryptedBytes, macBytes, incomingPushMessageSignalBytes, bytesToMac, expectedMacBytes;
@@ -1692,23 +1743,24 @@
                 },
                 __esModule: { value: true }
             });
-            var $__AccountCreator__, $__MessageSender__, $__MessageReceiver__, $__Protocol__, $__SignalingCipher__, $__WebSocketPushTransport__, $__axolotl__, $__axolotl_45_crypto__, $__axios__, $__co__;
+            var $__AccountCreator__, $__MessageSender__, $__MessageReceiver__, $__Protocol__, $__SignalingCipher__, $__WebSocketPushTransport__, $__AutoReconnectingWebSocket__, $__axolotl__, $__axolotl_45_crypto__, $__axios__, $__co__;
             var AccountCreator = ($__AccountCreator__ = _require(2), $__AccountCreator__ && $__AccountCreator__.__esModule && $__AccountCreator__ || { default: $__AccountCreator__ }).default;
-            var MessageSender = ($__MessageSender__ = _require(10), $__MessageSender__ && $__MessageSender__.__esModule && $__MessageSender__ || { default: $__MessageSender__ }).default;
-            var MessageReceiver = ($__MessageReceiver__ = _require(9), $__MessageReceiver__ && $__MessageReceiver__.__esModule && $__MessageReceiver__ || { default: $__MessageReceiver__ }).default;
-            var Protocol = ($__Protocol__ = _require(11), $__Protocol__ && $__Protocol__.__esModule && $__Protocol__ || { default: $__Protocol__ }).default;
-            var SignalingCipher = ($__SignalingCipher__ = _require(12), $__SignalingCipher__ && $__SignalingCipher__.__esModule && $__SignalingCipher__ || { default: $__SignalingCipher__ }).default;
-            var WebSocketPushTransport = ($__WebSocketPushTransport__ = _require(15), $__WebSocketPushTransport__ && $__WebSocketPushTransport__.__esModule && $__WebSocketPushTransport__ || { default: $__WebSocketPushTransport__ }).default;
-            var axolotl = ($__axolotl__ = _require(36), $__axolotl__ && $__axolotl__.__esModule && $__axolotl__ || { default: $__axolotl__ }).default;
-            var axolotlCrypto = ($__axolotl_45_crypto__ = _require(35), $__axolotl_45_crypto__ && $__axolotl_45_crypto__.__esModule && $__axolotl_45_crypto__ || { default: $__axolotl_45_crypto__ }).default;
-            var axios = ($__axios__ = _require(18), $__axios__ && $__axios__.__esModule && $__axios__ || { default: $__axios__ }).default;
-            var co = ($__co__ = _require(37), $__co__ && $__co__.__esModule && $__co__ || { default: $__co__ }).default;
+            var MessageSender = ($__MessageSender__ = _require(11), $__MessageSender__ && $__MessageSender__.__esModule && $__MessageSender__ || { default: $__MessageSender__ }).default;
+            var MessageReceiver = ($__MessageReceiver__ = _require(10), $__MessageReceiver__ && $__MessageReceiver__.__esModule && $__MessageReceiver__ || { default: $__MessageReceiver__ }).default;
+            var Protocol = ($__Protocol__ = _require(12), $__Protocol__ && $__Protocol__.__esModule && $__Protocol__ || { default: $__Protocol__ }).default;
+            var SignalingCipher = ($__SignalingCipher__ = _require(13), $__SignalingCipher__ && $__SignalingCipher__.__esModule && $__SignalingCipher__ || { default: $__SignalingCipher__ }).default;
+            var WebSocketPushTransport = ($__WebSocketPushTransport__ = _require(16), $__WebSocketPushTransport__ && $__WebSocketPushTransport__.__esModule && $__WebSocketPushTransport__ || { default: $__WebSocketPushTransport__ }).default;
+            var AutoReconnectingWebSocket = ($__AutoReconnectingWebSocket__ = _require(4), $__AutoReconnectingWebSocket__ && $__AutoReconnectingWebSocket__.__esModule && $__AutoReconnectingWebSocket__ || { default: $__AutoReconnectingWebSocket__ }).default;
+            var axolotl = ($__axolotl__ = _require(37), $__axolotl__ && $__axolotl__.__esModule && $__axolotl__ || { default: $__axolotl__ }).default;
+            var axolotlCrypto = ($__axolotl_45_crypto__ = _require(36), $__axolotl_45_crypto__ && $__axolotl_45_crypto__.__esModule && $__axolotl_45_crypto__ || { default: $__axolotl_45_crypto__ }).default;
+            var axios = ($__axios__ = _require(19), $__axios__ && $__axios__.__esModule && $__axios__ || { default: $__axios__ }).default;
+            var co = ($__co__ = _require(38), $__co__ && $__co__.__esModule && $__co__ || { default: $__co__ }).default;
             function TextSecure(store, serverEndpointHost, webSocketFactory, options) {
                 this.onmessage = function () {
                 };
                 this.onreceipt = function () {
                 };
-                this.sendMessage = co.wrap($traceurRuntime.initGeneratorFunction(function $__10(number, message, timestamp, attachments) {
+                this.sendMessage = co.wrap($traceurRuntime.initGeneratorFunction(function $__11(number, message, timestamp, attachments) {
                     return $traceurRuntime.createGeneratorInstance(function ($ctx) {
                         while (true)
                             switch ($ctx.state) {
@@ -1729,10 +1781,10 @@
                             default:
                                 return $ctx.end();
                             }
-                    }, $__10, this);
+                    }, $__11, this);
                 }));
-                this.requestVerificationCode = co.wrap($traceurRuntime.initGeneratorFunction(function $__11(number) {
-                    var $__12, $__13, $__14;
+                this.requestVerificationCode = co.wrap($traceurRuntime.initGeneratorFunction(function $__12(number) {
+                    var $__13, $__14, $__15;
                     return $traceurRuntime.createGeneratorInstance(function ($ctx) {
                         while (true)
                             switch ($ctx.state) {
@@ -1744,27 +1796,27 @@
                                 $ctx.state = 4;
                                 break;
                             case 4:
-                                $__12 = accountCreator.requestVerificationCode;
-                                $__13 = $__12.call(accountCreator, number);
+                                $__13 = accountCreator.requestVerificationCode;
+                                $__14 = $__13.call(accountCreator, number);
                                 $ctx.state = 10;
                                 break;
                             case 10:
                                 $ctx.state = 6;
-                                return $__13;
+                                return $__14;
                             case 6:
-                                $__14 = $ctx.sent;
+                                $__15 = $ctx.sent;
                                 $ctx.state = 8;
                                 break;
                             case 8:
-                                $ctx.returnValue = $__14;
+                                $ctx.returnValue = $__15;
                                 $ctx.state = -2;
                                 break;
                             default:
                                 return $ctx.end();
                             }
-                    }, $__11, this);
+                    }, $__12, this);
                 }));
-                this.registerFirstDevice = co.wrap($traceurRuntime.initGeneratorFunction(function $__15(number, verificationCode) {
+                this.registerFirstDevice = co.wrap($traceurRuntime.initGeneratorFunction(function $__16(number, verificationCode) {
                     return $traceurRuntime.createGeneratorInstance(function ($ctx) {
                         while (true)
                             switch ($ctx.state) {
@@ -1789,7 +1841,7 @@
                             default:
                                 return $ctx.end();
                             }
-                    }, $__15, this);
+                    }, $__16, this);
                 }));
                 options = Object.assign({}, {
                     httpUseTls: true,
@@ -1839,14 +1891,14 @@
                     };
                     var wsEndpoint = (options.webSocketUseTls ? 'wss' : 'ws') + '://' + serverEndpointHost;
                     var wsUrl = wsEndpoint + '/v1/websocket/?login=' + encodeURIComponent(localState.auth.number) + '.' + encodeURIComponent(localState.auth.device) + '&password=' + encodeURIComponent(localState.auth.password);
-                    var webSocket = webSocketFactory.connect(wsUrl);
+                    var webSocket = new AutoReconnectingWebSocket(webSocketFactory, wsUrl);
                     var transport = new WebSocketPushTransport(webSocket);
                     transport.onmessage = messageReceiver.processIncomingMessageSignal;
                 };
                 var registered = function () {
                     return !!localState;
                 };
-                var checkIsRegistered = co.wrap($traceurRuntime.initGeneratorFunction(function $__16() {
+                var checkIsRegistered = co.wrap($traceurRuntime.initGeneratorFunction(function $__17() {
                         return $traceurRuntime.createGeneratorInstance(function ($ctx) {
                             while (true)
                                 switch ($ctx.state) {
@@ -1866,9 +1918,9 @@
                                 default:
                                     return $ctx.end();
                                 }
-                        }, $__16, this);
+                        }, $__17, this);
                     }));
-                var checkIsUnregistered = co.wrap($traceurRuntime.initGeneratorFunction(function $__17() {
+                var checkIsUnregistered = co.wrap($traceurRuntime.initGeneratorFunction(function $__18() {
                         return $traceurRuntime.createGeneratorInstance(function ($ctx) {
                             while (true)
                                 switch ($ctx.state) {
@@ -1888,14 +1940,14 @@
                                 default:
                                     return $ctx.end();
                                 }
-                        }, $__17, this);
+                        }, $__18, this);
                     }));
             }
             var $__default = TextSecure;
         },
         function (module, exports) {
             'use strict';
-            module.exports = _require(38).newBuilder({})['import']({
+            module.exports = _require(39).newBuilder({})['import']({
                 'package': 'textsecure',
                 'messages': [
                     {
@@ -2037,7 +2089,7 @@
                 __esModule: { value: true }
             });
             var $__WebSocketProtocolProtos__;
-            var WebSocketProtocolProtos = ($__WebSocketProtocolProtos__ = _require(14), $__WebSocketProtocolProtos__ && $__WebSocketProtocolProtos__.__esModule && $__WebSocketProtocolProtos__ || { default: $__WebSocketProtocolProtos__ }).default;
+            var WebSocketProtocolProtos = ($__WebSocketProtocolProtos__ = _require(15), $__WebSocketProtocolProtos__ && $__WebSocketProtocolProtos__.__esModule && $__WebSocketProtocolProtos__ || { default: $__WebSocketProtocolProtos__ }).default;
             var WebSocketMessage = WebSocketProtocolProtos.WebSocketMessage;
             var keepAliveIntervalMilliseconds = 15000;
             function WebSocketPushTransport(webSocket) {
@@ -2101,17 +2153,17 @@
             module.exports = __external_https;
         },
         function (module, exports) {
-            module.exports = _require(21);
+            module.exports = _require(22);
         },
         function (module, exports) {
-            var defaults = _require(24);
-            var utils = _require(32);
-            var buildUrl = _require(25);
-            var transformData = _require(30);
-            var http = _require(16);
-            var https = _require(17);
-            var url = _require(39);
-            var pkg = _require(34);
+            var defaults = _require(25);
+            var utils = _require(33);
+            var buildUrl = _require(26);
+            var transformData = _require(31);
+            var http = _require(17);
+            var https = _require(18);
+            var url = _require(40);
+            var pkg = _require(35);
             var Buffer = _require(0).Buffer;
             module.exports = function httpAdapter(resolve, reject, config) {
                 var data = transformData(config.data, config.headers, config.transformRequest);
@@ -2158,13 +2210,13 @@
             };
         },
         function (module, exports) {
-            var defaults = _require(24);
-            var utils = _require(32);
-            var buildUrl = _require(25);
-            var cookies = _require(26);
-            var parseHeaders = _require(28);
-            var transformData = _require(30);
-            var urlIsSameOrigin = _require(31);
+            var defaults = _require(25);
+            var utils = _require(33);
+            var buildUrl = _require(26);
+            var cookies = _require(27);
+            var parseHeaders = _require(29);
+            var transformData = _require(31);
+            var urlIsSameOrigin = _require(32);
             module.exports = function xhrAdapter(resolve, reject, config) {
                 var data = transformData(config.data, config.headers, config.transformRequest);
                 var headers = utils.merge(defaults.headers.common, defaults.headers[config.method] || {}, config.headers || {});
@@ -2216,12 +2268,12 @@
             };
         },
         function (module, exports) {
-            var defaults = _require(24);
-            var utils = _require(32);
-            var deprecatedMethod = _require(27);
-            var dispatchRequest = _require(23);
-            var InterceptorManager = _require(22);
-            _require(33).polyfill();
+            var defaults = _require(25);
+            var utils = _require(33);
+            var deprecatedMethod = _require(28);
+            var dispatchRequest = _require(24);
+            var InterceptorManager = _require(23);
+            _require(34).polyfill();
             var axios = module.exports = function axios(config) {
                     config = utils.merge({
                         method: 'get',
@@ -2264,7 +2316,7 @@
             axios.all = function (promises) {
                 return Promise.all(promises);
             };
-            axios.spread = _require(29);
+            axios.spread = _require(30);
             axios.interceptors = {
                 request: new InterceptorManager(),
                 response: new InterceptorManager()
@@ -2295,7 +2347,7 @@
         },
         function (module, exports) {
             'use strict';
-            var utils = _require(32);
+            var utils = _require(33);
             function InterceptorManager() {
                 this.handlers = [];
             }
@@ -2323,14 +2375,14 @@
         },
         function (module, exports) {
             'use strict';
-            var Promise = _require(33).Promise;
+            var Promise = _require(34).Promise;
             module.exports = function dispatchRequest(config) {
                 return new Promise(function (resolve, reject) {
                     try {
                         if (typeof window !== 'undefined') {
-                            _require(20)(resolve, reject, config);
+                            _require(21)(resolve, reject, config);
                         } else if (typeof process !== 'undefined') {
-                            _require(19)(resolve, reject, config);
+                            _require(20)(resolve, reject, config);
                         }
                     } catch (e) {
                         reject(e);
@@ -2340,7 +2392,7 @@
         },
         function (module, exports) {
             'use strict';
-            var utils = _require(32);
+            var utils = _require(33);
             var JSON_START = /^\s*(\[|\{[^\{])/;
             var JSON_END = /[\}\]]\s*$/;
             var PROTECTION_PREFIX = /^\)\]\}',?\n/;
@@ -2382,7 +2434,7 @@
         },
         function (module, exports) {
             'use strict';
-            var utils = _require(32);
+            var utils = _require(33);
             function encode(val) {
                 return encodeURIComponent(val).replace(/%40/gi, '@').replace(/%3A/gi, ':').replace(/%24/g, '$').replace(/%2C/gi, ',').replace(/%20/g, '+');
             }
@@ -2415,7 +2467,7 @@
         },
         function (module, exports) {
             'use strict';
-            var utils = _require(32);
+            var utils = _require(33);
             module.exports = {
                 write: function write(name, value, expires, path, domain, secure) {
                     var cookie = [];
@@ -2457,7 +2509,7 @@
         },
         function (module, exports) {
             'use strict';
-            var utils = _require(32);
+            var utils = _require(33);
             module.exports = function parseHeaders(headers) {
                 var parsed = {}, key, val, i;
                 if (!headers)
@@ -2482,7 +2534,7 @@
         },
         function (module, exports) {
             'use strict';
-            var utils = _require(32);
+            var utils = _require(33);
             module.exports = function transformData(data, headers, fns) {
                 utils.forEach(fns, function (fn) {
                     data = fn(data, headers);
@@ -2493,7 +2545,7 @@
         function (module, exports) {
             'use strict';
             var msie = /(msie|trident)/i.test(navigator.userAgent);
-            var utils = _require(32);
+            var utils = _require(33);
             var urlParsingNode = document.createElement('a');
             var originUrl = urlResolve(window.location.href);
             function urlResolve(url) {
@@ -3163,7 +3215,7 @@
                 'gitHead': 'fa6c26a0e5eaad5d58071eb39d7afff0c7dc051c',
                 '_id': 'axios@0.5.0',
                 '_shasum': '2f369e6309a46b182c38ce683ba4fbc608d5b4ef',
-                '_from': 'axios@',
+                '_from': 'axios@^0.5.0',
                 '_npmVersion': '2.1.6',
                 '_nodeVersion': '0.10.33',
                 '_npmUser': {
